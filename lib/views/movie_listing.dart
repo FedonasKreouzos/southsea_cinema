@@ -15,7 +15,19 @@ class MovieListing extends StatelessWidget {
         elevation: 0,
       ),
       drawer: const NavDrawer(),
-      body: const SizedBox.shrink(),
+      body: Container(
+      padding: const EdgeInsets.all(16),
+      child: const Column(
+        children: [
+        Text(
+          'DRACULA (1931) (PG)',
+        ),
+         Text(
+          'A classic horror film shown at Southsea Cinema.',
+      ),
+    ],
+  ),
+),
     );
   }
 }
