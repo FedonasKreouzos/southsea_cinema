@@ -7,7 +7,7 @@ class MovieRepository {
         id: '1',
         title: 'Dracula',
         synopsis: 'A classic horror film.',
-        ageRating: 'PG',
+        ageRating: '15',
         screeningTime: '18:00',
         ticketPrice: 8.50,
         posterImagePath: 'assets/images/dracula.webp',
