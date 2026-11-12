@@ -33,9 +33,7 @@ class MovieCard extends StatelessWidget {
                 fit: BoxFit.contain,
               ),
             ),
-
             const SizedBox(height: 16),
-
             Text(
               movie.title,
               style: const TextStyle(
@@ -44,9 +42,7 @@ class MovieCard extends StatelessWidget {
                 color: Color(0xFF55D6E8),
               ),
             ),
-
             const SizedBox(height: 8),
-
             Text(
               'Age Rating: ${movie.ageRating}',
               style: const TextStyle(
@@ -54,9 +50,7 @@ class MovieCard extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-
             const SizedBox(height: 10),
-
             Text(
               movie.synopsis,
               style: const TextStyle(
@@ -64,16 +58,12 @@ class MovieCard extends StatelessWidget {
                 fontSize: 15,
               ),
             ),
-
             const SizedBox(height: 12),
-
             Text(
               'Screening Time: ${movie.screeningTime}',
               style: const TextStyle(color: Colors.white),
             ),
-
             const SizedBox(height: 6),
-
             Text(
               'Ticket Price: £${movie.ticketPrice.toStringAsFixed(2)}',
               style: const TextStyle(
@@ -81,9 +71,7 @@ class MovieCard extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-
             const SizedBox(height: 16),
-
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

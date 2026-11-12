@@ -15,7 +15,8 @@ class MovieRepository {
       Movie(
         id: '2',
         title: 'Taken',
-        synopsis: 'An action thriller about a father searching for his daughter.',
+        synopsis:
+            'An action thriller about a father searching for his daughter.',
         ageRating: '15',
         screeningTime: '20:00',
         ticketPrice: 9.50,
@@ -23,13 +24,14 @@ class MovieRepository {
       ),
     ];
   }
-        Movie? getMovieById(String id) {
-        for (final movie in getMovies()) {
-          if (movie.id == id) {
-            return movie;
-          }
-        }
 
-        return null;
+  Movie? getMovieById(String id) {
+    for (final movie in getMovies()) {
+      if (movie.id == id) {
+        return movie;
       }
+    }
+
+    return null;
+  }
 }

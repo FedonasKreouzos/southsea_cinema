@@ -4,7 +4,6 @@ import 'package:southsea_cinema/widgets/movie_card.dart';
 import 'package:southsea_cinema/views/movie_listing.dart';
 import 'package:southsea_cinema/widgets/nav_drawer.dart';
 
-
 class HomeView extends StatelessWidget {
   const HomeView({super.key});
 
@@ -25,16 +24,16 @@ class HomeView extends StatelessWidget {
 
           return MovieCard(
             movie: movie,
-        onBookNow: () {
-            Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => MovieListing(
-                movie: movie,
-              ),
-            ),
-          );
-        },
+            onBookNow: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MovieListing(
+                    movie: movie,
+                  ),
+                ),
+              );
+            },
           );
         },
       ),

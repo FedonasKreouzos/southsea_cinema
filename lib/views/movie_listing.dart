@@ -39,7 +39,6 @@ class _MovieListingState extends State<MovieListing> {
               fit: BoxFit.contain,
             ),
             const SizedBox(height: 16),
-
             Text(
               '${widget.movie.title} (${widget.movie.ageRating})',
             ),
@@ -47,11 +46,9 @@ class _MovieListingState extends State<MovieListing> {
             Text('Screening Time: ${widget.movie.screeningTime}'),
             Text(widget.movie.synopsis),
             Text(
-            'Ticket Price: ${widget.movie.formattedPrice}',          
+              'Ticket Price: ${widget.movie.formattedPrice}',
             ),
-
             const SizedBox(height: 16),
-
             DropdownMenu<int>(
               initialSelection: 0,
               onSelected: (int? value) {
@@ -70,19 +67,15 @@ class _MovieListingState extends State<MovieListing> {
                 DropdownMenuEntry(value: 5, label: '5'),
               ],
             ),
-
             const SizedBox(height: 12),
-
             ElevatedButton(
               onPressed: () {
                 setState(() {
-                  _feedback =
-                      '$_ticketQuantity ticket(s) added to order';
+                  _feedback = '$_ticketQuantity ticket(s) added to order';
                 });
               },
               child: const Text('Add to Order'),
             ),
-
             Text(_feedback),
           ],
         ),
