@@ -2,19 +2,43 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:southsea_cinema/main.dart';
 
 void main() {
-  testWidgets('Home page displays movie cards and booking buttons',
+  testWidgets('Complete booking flow and book a different movie',
       (WidgetTester tester) async {
     await tester.pumpWidget(const SouthseaCinemaApp());
     await tester.pumpAndSettle();
 
-    // Check the home page title
-    expect(find.text('Southsea Cinema'), findsOneWidget);
-
-    // Check that both movies are displayed
+    // Check the home page
     expect(find.text('Dracula'), findsOneWidget);
     expect(find.text('Taken'), findsOneWidget);
 
-    // Check that both Book Now buttons are displayed
-    expect(find.text('Book Now'), findsNWidgets(2));
+    // Book Dracula
+    await tester.tap(find.text('Book Now').first);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Dracula (15)'), findsOneWidget);
+    expect(find.text('Ticket Price: £8.50'), findsOneWidget);
+
+    // Add tickets
+    await tester.tap(find.text('Add to Order'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('0 ticket(s) added to order'), findsOneWidget);
+
+    // Return to home page using the back button
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    // Book Taken
+    await tester.tap(find.text('Book Now').last);
+    await tester.pumpAndSettle();
+
+    // Check Taken's booking details
+    expect(find.text('Taken (15)'), findsOneWidget);
+    expect(find.text('Screening Time: 20:00'), findsOneWidget);
+    expect(find.text('Ticket Price: £9.50'), findsOneWidget);
+    expect(
+      find.text('An action thriller about a father searching for his daughter.'),
+      findsOneWidget,
+    );
   });
 }
