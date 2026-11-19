@@ -22,6 +22,13 @@ class SouthseaCinemaApp extends StatelessWidget {
           surface: cinemaSurface,
         ),
         appBarTheme: cinemaTheme.appBarTheme,
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.zero,
+            ),
+          ),
+        ),
       ),
       initialRoute: '/',
       routes: {
