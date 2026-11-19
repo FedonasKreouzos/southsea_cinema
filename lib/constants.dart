@@ -16,3 +16,13 @@ const TextStyle cinemaHeaderStyle = TextStyle(
   fontSize: 18,
   fontWeight: FontWeight.bold,
 );
+final ThemeData cinemaTheme = ThemeData(
+  appBarTheme: const AppBarTheme(
+    backgroundColor: cinemaSurface,
+    iconTheme: IconThemeData(
+      color: cinemaBrand,
+    ),
+    titleTextStyle: cinemaHeaderStyle,
+    elevation: 0,
+  ),
+);

@@ -21,6 +21,7 @@ class SouthseaCinemaApp extends StatelessWidget {
           primary: cinemaBrand,
           surface: cinemaSurface,
         ),
+        appBarTheme: cinemaTheme.appBarTheme,
       ),
       initialRoute: '/',
       routes: {

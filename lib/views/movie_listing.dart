@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:southsea_cinema/constants.dart';
 import 'package:southsea_cinema/models/movie.dart';
 import 'package:southsea_cinema/widgets/nav_drawer.dart';
 
@@ -30,10 +29,7 @@ class _MovieListingState extends State<MovieListing> {
             Navigator.pop(context);
           },
         ),
-        title: Text(widget.movie.title, style: cinemaHeaderStyle),
-        backgroundColor: cinemaSurface,
-        iconTheme: const IconThemeData(color: cinemaBrand),
-        elevation: 0,
+        title: Text(widget.movie.title),
       ),
 
       drawer: const NavDrawer(),
