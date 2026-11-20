@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:southsea_cinema/constants.dart';
 import 'package:southsea_cinema/models/user_settings.dart';
 import 'package:southsea_cinema/widgets/nav_drawer.dart';
@@ -12,11 +13,24 @@ class SettingsView extends StatefulWidget {
 }
 
 class _SettingsViewState extends State<SettingsView> {
+  final SharedPreferencesAsync _preferences = SharedPreferencesAsync();
+
   late TextEditingController _addressController;
   late TextEditingController _emailController;
   late TextEditingController _patronController;
 
+  static const String _addressKey = 'customer_address';
+  static const String _emailKey = 'customer_email';
+  static const String _patronNumberKey = 'customer_patron_number';
+  static const String _receiveNewsKey = 'customer_receive_news';
+
+  static const String _defaultAddress =
+      'Buckingham Building,\nLion Terrace,\nPortsmouth\nPO1 3HE';
+  static const String _defaultEmail = 'alex@example.com';
+  static const String _defaultPatronNumber = '1234';
+
   bool _receiveNews = true;
+  bool _isLoading = true;
   String _confirmationMessage = '';
   UserSettings? _savedSettings;
 
@@ -25,31 +39,52 @@ class _SettingsViewState extends State<SettingsView> {
     super.initState();
 
     _addressController = TextEditingController(
-      text: 'Buckingham Building,\nLion Terrace,\nPortsmouth\nPO1 3HE',
+      text: _defaultAddress,
     );
 
     _emailController = TextEditingController(
-      text: 'alex@example.com',
+      text: _defaultEmail,
     );
 
     _patronController = TextEditingController(
-      text: '1234',
+      text: _defaultPatronNumber,
     );
+
+    _loadSettings();
   }
 
-  void _cancelChanges() {
-    setState(() {
-      _addressController.text =
-          'Buckingham Building,\nLion Terrace,\nPortsmouth\nPO1 3HE';
-      _emailController.text = 'alex@example.com';
-      _patronController.text = '1234';
-      _receiveNews = true;
-      _confirmationMessage = '';
-      _savedSettings = null;
-    });
+  Future<void> _loadSettings() async {
+    try {
+      final address =
+          await _preferences.getString(_addressKey);
+      final email =
+          await _preferences.getString(_emailKey);
+      final patronNumber =
+          await _preferences.getString(_patronNumberKey);
+      final receiveNews =
+          await _preferences.getBool(_receiveNewsKey);
+
+      if (!mounted) return;
+
+      setState(() {
+        _addressController.text = address ?? _defaultAddress;
+        _emailController.text = email ?? _defaultEmail;
+        _patronController.text =
+            patronNumber ?? _defaultPatronNumber;
+        _receiveNews = receiveNews ?? true;
+        _isLoading = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoading = false;
+        _confirmationMessage = 'Unable to load saved settings';
+      });
+    }
   }
 
-  void _saveSettings() {
+  Future<void> _saveSettings() async {
     final settings = UserSettings(
       address: _addressController.text.trim(),
       email: _emailController.text.trim(),
@@ -57,9 +92,54 @@ class _SettingsViewState extends State<SettingsView> {
       receiveNews: _receiveNews,
     );
 
+    try {
+      await _preferences.setString(
+        _addressKey,
+        settings.address,
+      );
+
+      await _preferences.setString(
+        _emailKey,
+        settings.email,
+      );
+
+      await _preferences.setString(
+        _patronNumberKey,
+        settings.patronNumber,
+      );
+
+      await _preferences.setBool(
+        _receiveNewsKey,
+        settings.receiveNews,
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _savedSettings = settings;
+        _confirmationMessage = 'Settings saved successfully';
+      });
+    } catch (error) {
+      if (!mounted) return;
+
+      setState(() {
+        _confirmationMessage = 'Unable to save settings';
+      });
+    }
+  }
+
+  void _cancelChanges() {
+    final settings = _savedSettings;
+
     setState(() {
-      _savedSettings = settings;
-      _confirmationMessage = 'Settings saved successfully';
+      _addressController.text =
+          settings?.address ?? _defaultAddress;
+      _emailController.text =
+          settings?.email ?? _defaultEmail;
+      _patronController.text =
+          settings?.patronNumber ?? _defaultPatronNumber;
+      _receiveNews = settings?.receiveNews ?? true;
+      _confirmationMessage = '';
     });
   }
 
@@ -111,105 +191,109 @@ class _SettingsViewState extends State<SettingsView> {
         title: const Text('My Settings'),
       ),
       drawer: const NavDrawer(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'My Settings',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: cinemaFontWhite,
-              ),
-            ),
-            const SizedBox(height: 28),
-            _buildLabel('Address'),
-            TextField(
-              controller: _addressController,
-              maxLines: 4,
-              decoration: _fieldDecoration().copyWith(
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () {
-                    _addressController.clear();
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            _buildLabel('Email Address'),
-            TextField(
-              controller: _emailController,
-              keyboardType: TextInputType.emailAddress,
-              decoration: _fieldDecoration(),
-            ),
-            const SizedBox(height: 24),
-            _buildLabel('Patron Number'),
-            TextField(
-              controller: _patronController,
-              keyboardType: TextInputType.number,
-              decoration: _fieldDecoration(),
-            ),
-            const SizedBox(height: 24),
-            _buildLabel('Preferences'),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Receive news by email'),
-                Switch(
-                  value: _receiveNews,
-                  activeTrackColor: cinemaBrand,
-                  onChanged: (value) {
-                    setState(() {
-                      _receiveNews = value;
-                    });
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 28),
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: _cancelChanges,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: cinemaSurface,
-                      foregroundColor: cinemaFontWhite,
-                      minimumSize: const Size(double.infinity, 45),
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
+      body: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'My Settings',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: cinemaFontWhite,
+                    ),
+                  ),
+                  const SizedBox(height: 28),
+                  _buildLabel('Address'),
+                  TextField(
+                    controller: _addressController,
+                    maxLines: 4,
+                    decoration: _fieldDecoration().copyWith(
+                      suffixIcon: IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          _addressController.clear();
+                        },
                       ),
                     ),
-                    child: const Text('CANCEL'),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  flex: 2,
-                  child: PrimaryButton(
-                    label: 'SAVE SETTINGS',
-                    onPressed: _saveSettings,
+                  const SizedBox(height: 24),
+                  _buildLabel('Email Address'),
+                  TextField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: _fieldDecoration(),
                   ),
-                ),
-              ],
-            ),
-            if (_savedSettings != null &&
-                _confirmationMessage.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Text(
-                _confirmationMessage,
-                style: const TextStyle(
-                  color: cinemaBrand,
-                  fontWeight: FontWeight.bold,
-                ),
+                  const SizedBox(height: 24),
+                  _buildLabel('Patron Number'),
+                  TextField(
+                    controller: _patronController,
+                    keyboardType: TextInputType.number,
+                    decoration: _fieldDecoration(),
+                  ),
+                  const SizedBox(height: 24),
+                  _buildLabel('Preferences'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Receive news by email'),
+                      Switch(
+                        value: _receiveNews,
+                        activeTrackColor: cinemaBrand,
+                        onChanged: (value) {
+                          setState(() {
+                            _receiveNews = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 28),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _cancelChanges,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: cinemaSurface,
+                            foregroundColor: cinemaFontWhite,
+                            minimumSize:
+                                const Size(double.infinity, 45),
+                            shape: const RoundedRectangleBorder(
+                              borderRadius: BorderRadius.zero,
+                            ),
+                          ),
+                          child: const Text('CANCEL'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 2,
+                        child: PrimaryButton(
+                          label: 'SAVE SETTINGS',
+                          onPressed: _saveSettings,
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (_confirmationMessage.isNotEmpty) ...[
+                    const SizedBox(height: 16),
+                    Text(
+                      _confirmationMessage,
+                      style: const TextStyle(
+                        color: cinemaBrand,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ],
               ),
-            ],
-          ],
-        ),
-      ),
+            ),
     );
   }
 }
