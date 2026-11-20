@@ -1,19 +1,25 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:southsea_cinema/models/movie.dart';
 import 'package:southsea_cinema/repositories/basket_repository.dart';
 import 'package:southsea_cinema/repositories/movie_repository.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late BasketRepository basketRepository;
   late MovieRepository movieRepository;
+  late List<Movie> movies;
 
-  setUp(() {
+  setUp(() async {
     basketRepository = BasketRepository.instance;
     basketRepository.clear();
+
     movieRepository = MovieRepository();
+    movies = await movieRepository.loadMoviesFromAsset();
   });
 
   test('Add a movie to the basket', () {
-    final movie = movieRepository.getMovieById('1')!;
+    final movie = movieRepository.getMovieById('1', movies)!;
 
     basketRepository.addItem(movie);
 
@@ -23,7 +29,7 @@ void main() {
   });
 
   test('Add more tickets for the same movie', () {
-    final movie = movieRepository.getMovieById('1')!;
+    final movie = movieRepository.getMovieById('1', movies)!;
 
     basketRepository.addItem(movie, quantity: 2);
     basketRepository.addItem(movie, quantity: 3);
@@ -33,7 +39,7 @@ void main() {
   });
 
   test('Remove a movie from the basket', () {
-    final movie = movieRepository.getMovieById('1')!;
+    final movie = movieRepository.getMovieById('1', movies)!;
 
     basketRepository.addItem(movie);
     basketRepository.removeItem('1');
@@ -42,8 +48,13 @@ void main() {
   });
 
   test('Clear the basket', () {
-    basketRepository.addItem(movieRepository.getMovieById('1')!);
-    basketRepository.addItem(movieRepository.getMovieById('2')!);
+    basketRepository.addItem(
+      movieRepository.getMovieById('1', movies)!,
+    );
+
+    basketRepository.addItem(
+      movieRepository.getMovieById('2', movies)!,
+    );
 
     basketRepository.clear();
 
@@ -52,12 +63,12 @@ void main() {
 
   test('Calculate the correct basket total', () {
     basketRepository.addItem(
-      movieRepository.getMovieById('1')!,
+      movieRepository.getMovieById('1', movies)!,
       quantity: 2,
     );
 
     basketRepository.addItem(
-      movieRepository.getMovieById('2')!,
+      movieRepository.getMovieById('2', movies)!,
       quantity: 1,
     );
 

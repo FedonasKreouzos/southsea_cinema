@@ -1,5 +1,5 @@
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:southsea_cinema/main.dart';
 
 void main() {
@@ -7,6 +7,8 @@ void main() {
     'Complete booking flow and book a different movie',
     (WidgetTester tester) async {
       await tester.pumpWidget(const SouthseaCinemaApp());
+
+      await tester.pump();
       await tester.pumpAndSettle();
 
       expect(find.text('Dracula'), findsOneWidget);
