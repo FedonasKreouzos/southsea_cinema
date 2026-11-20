@@ -6,23 +6,33 @@ import 'package:shared_preferences_platform_interface/shared_preferences_async_p
 import 'package:southsea_cinema/views/settings_view.dart';
 
 void main() {
-  TestWidgetsFlutterBinding.ensureInitialized();
+  late SharedPreferencesAsync preferences;
 
   setUp(() {
     SharedPreferencesAsyncPlatform.instance =
         InMemorySharedPreferencesAsync.empty();
+    preferences = SharedPreferencesAsync();
   });
+
+  tearDown(() {
+    SharedPreferencesAsyncPlatform.instance = null;
+  });
+
+  Future<void> openSettings(WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SettingsView(),
+      ),
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+  }
 
   testWidgets(
     'Settings screen displays form fields and switch',
     (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: SettingsView(),
-        ),
-      );
-
-      await tester.pumpAndSettle();
+      await openSettings(tester);
 
       expect(find.text('Address'), findsOneWidget);
       expect(find.text('Email Address'), findsOneWidget);
@@ -36,76 +46,15 @@ void main() {
   );
 
   testWidgets(
-    'Editing fields and saving settings updates state',
+    'Saved preferences load when Settings screen opens',
     (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: SettingsView(),
-        ),
-      );
-
-      await tester.pumpAndSettle();
-
-      final Finder addressField = find.byType(TextField).at(0);
-      final Finder emailField = find.byType(TextField).at(1);
-      final Finder patronField = find.byType(TextField).at(2);
-
-      await tester.enterText(
-        addressField,
-        '10 Elm Road, Portsmouth',
-      );
-
-      await tester.enterText(
-        emailField,
-        'alex@example.com',
-      );
-
-      await tester.enterText(
-        patronField,
-        '5678',
-      );
-
-      final Finder switchFinder = find.byType(Switch);
-
-      expect(
-        tester.widget<Switch>(switchFinder).value,
-        isTrue,
-      );
-
-      await tester.ensureVisible(switchFinder);
-      await tester.tap(switchFinder);
-      await tester.pumpAndSettle();
-
-      expect(
-        tester.widget<Switch>(switchFinder).value,
-        isFalse,
-      );
-
-      final Finder saveButton = find.text('SAVE SETTINGS');
-
-      await tester.ensureVisible(saveButton);
-      await tester.tap(saveButton);
-      await tester.pumpAndSettle();
-
-      expect(
-        find.text('Settings saved successfully'),
-        findsOneWidget,
-      );
-    },
-  );
-
-  testWidgets(
-    'Saved settings are loaded when the settings page reopens',
-    (WidgetTester tester) async {
-      final preferences = SharedPreferencesAsync();
-
       await preferences.setString(
         'customer_address',
         '10 Elm Road, Portsmouth',
       );
       await preferences.setString(
         'customer_email',
-        'alex@example.com',
+        'test@example.com',
       );
       await preferences.setString(
         'customer_patron_number',
@@ -116,30 +65,126 @@ void main() {
         false,
       );
 
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: SettingsView(),
-        ),
-      );
-
-      await tester.pumpAndSettle();
+      await openSettings(tester);
 
       expect(
-        tester.widget<TextField>(find.byType(TextField).at(0))
-            .controller!.text,
+        tester.widget<TextField>(find.byType(TextField).at(0)).controller!.text,
         '10 Elm Road, Portsmouth',
       );
 
       expect(
-        tester.widget<TextField>(find.byType(TextField).at(1))
-            .controller!.text,
-        'alex@example.com',
+        tester.widget<TextField>(find.byType(TextField).at(1)).controller!.text,
+        'test@example.com',
       );
 
       expect(
-        tester.widget<TextField>(find.byType(TextField).at(2))
-            .controller!.text,
+        tester.widget<TextField>(find.byType(TextField).at(2)).controller!.text,
         '5678',
+      );
+
+      expect(
+        tester.widget<Switch>(find.byType(Switch)).value,
+        isFalse,
+      );
+    },
+  );
+
+  testWidgets(
+    'Editing and saving settings stores updated preferences',
+    (WidgetTester tester) async {
+      await openSettings(tester);
+
+      await tester.enterText(
+        find.byType(TextField).at(0),
+        '20 New Road, Portsmouth',
+      );
+
+      await tester.enterText(
+        find.byType(TextField).at(1),
+        'new@example.com',
+      );
+
+      await tester.enterText(
+        find.byType(TextField).at(2),
+        '9876',
+      );
+
+      final switchFinder = find.byType(Switch);
+      await tester.ensureVisible(switchFinder);
+      await tester.tap(switchFinder);
+      await tester.pump();
+
+      final saveButton = find.text('SAVE SETTINGS');
+      await tester.ensureVisible(saveButton);
+      await tester.tap(saveButton);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(
+        find.text('Settings saved successfully'),
+        findsOneWidget,
+      );
+
+      expect(
+        await preferences.getString('customer_address'),
+        '20 New Road, Portsmouth',
+      );
+
+      expect(
+        await preferences.getString('customer_email'),
+        'new@example.com',
+      );
+
+      expect(
+        await preferences.getString('customer_patron_number'),
+        '9876',
+      );
+
+      expect(
+        await preferences.getBool('customer_receive_news'),
+        isFalse,
+      );
+    },
+  );
+
+  testWidgets(
+    'Saved preferences remain available when Settings screen is reopened',
+    (WidgetTester tester) async {
+      await preferences.setString(
+        'customer_address',
+        '20 New Road, Portsmouth',
+      );
+      await preferences.setString(
+        'customer_email',
+        'new@example.com',
+      );
+      await preferences.setString(
+        'customer_patron_number',
+        '9876',
+      );
+      await preferences.setBool(
+        'customer_receive_news',
+        false,
+      );
+
+      await openSettings(tester);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      await openSettings(tester);
+
+      expect(
+        tester.widget<TextField>(find.byType(TextField).at(0)).controller!.text,
+        '20 New Road, Portsmouth',
+      );
+
+      expect(
+        tester.widget<TextField>(find.byType(TextField).at(1)).controller!.text,
+        'new@example.com',
+      );
+
+      expect(
+        tester.widget<TextField>(find.byType(TextField).at(2)).controller!.text,
+        '9876',
       );
 
       expect(
