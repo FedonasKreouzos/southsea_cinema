@@ -6,6 +6,7 @@ class Movie {
   final String screeningTime;
   final double ticketPrice;
   final String posterImagePath;
+
   String get formattedPrice => '£${ticketPrice.toStringAsFixed(2)}';
 
   const Movie({
@@ -17,4 +18,28 @@ class Movie {
     required this.ticketPrice,
     required this.posterImagePath,
   });
+
+  factory Movie.fromJson(Map<String, dynamic> json) {
+    return Movie(
+      id: json['id'] as String,
+      title: json['title'] as String,
+      synopsis: json['synopsis'] as String,
+      ageRating: json['ageRating'] as String,
+      screeningTime: json['screeningTime'] as String,
+      ticketPrice: (json['ticketPrice'] as num).toDouble(),
+      posterImagePath: json['posterImagePath'] as String,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'title': title,
+      'synopsis': synopsis,
+      'ageRating': ageRating,
+      'screeningTime': screeningTime,
+      'ticketPrice': ticketPrice,
+      'posterImagePath': posterImagePath,
+    };
+  }
 }

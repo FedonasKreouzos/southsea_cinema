@@ -1,0 +1,20 @@
+[
+  {
+    "id": "1",
+    "title": "Dracula",
+    "synopsis": "A classic horror film.",
+    "ageRating": "15",
+    "screeningTime": "18:00",
+    "ticketPrice": 8.50,
+    "posterImagePath": "assets/images/dracula.webp"
+  },
+  {
+    "id": "2",
+    "title": "Taken",
+    "synopsis": "An action thriller about a father searching for his daughter.",
+    "ageRating": "15",
+    "screeningTime": "20:00",
+    "ticketPrice": 9.50,
+    "posterImagePath": "assets/images/taken.webp"
+  }
+]
