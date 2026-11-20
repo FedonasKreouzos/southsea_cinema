@@ -37,6 +37,8 @@ class _HomeViewState extends State<HomeView> {
         _errorMessage = null;
       });
     } catch (error) {
+        debugPrint('MOVIE LOADING ERROR: $error');
+        
       if (!mounted) return;
 
       setState(() {
